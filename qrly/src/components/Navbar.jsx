@@ -19,7 +19,7 @@ export default function Navbar() {
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex space-x-8 text-lg">
-                        <Link href="/" className="hover:text-blue-400 transition-colors">
+                        <Link href="/dashboard" className="hover:text-blue-400 transition-colors">
                             Home
                         </Link>
                         <Link href="/about" className="hover:text-blue-400 transition-colors">
@@ -50,7 +50,7 @@ export default function Navbar() {
             {isOpen && (
                 <div className="md:hidden bg-gray-800 px-4 py-3 space-y-2">
                     <Link
-                        href="/"
+                        href="/dashboard"
                         className="block hover:text-blue-400 transition-colors"
                         onClick={() => setIsOpen(false)}
                     >
@@ -76,8 +76,8 @@ export default function Navbar() {
                         onClick={() => setIsOpen(false)}
                     >
                         Contact
-                    </Link>
                     <UserButton></UserButton>
+                    </Link>
 
                 </div>
             )}

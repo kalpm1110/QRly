@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useUser } from '@clerk/nextjs';
+import QRModal from '../QR/QRModal';
 
 export default function CreateQR({ defaultCampaignId = null }) {
   const { user } = useUser();
@@ -18,30 +19,35 @@ export default function CreateQR({ defaultCampaignId = null }) {
   // const [maxScans, setMaxScans] = useState("");
   const [shortUrl, setShortUrl] = useState(null);
   const [loading, setLoading] = useState(false);
-  const handleSubmit=async (e) => {
+
+
+  const [modalopn, setmodalopn] = useState(false);
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const payload={
+    const payload = {
       title,
-      owner_id:user.id,
-      campaign_id:defaultCampaignId || null,
+      owner_id: user.id,
+      campaign_id: defaultCampaignId || null,
       reqpass,
-      url:targetUrl,
-      password:reqpass?password:undefined,
-      expires_at:expiresAt?new Date(expiresAt).toISOString():undefined,
+      url: targetUrl,
+      password: reqpass ? password : undefined,
+      expires_at: expiresAt ? new Date(expiresAt).toISOString() : undefined,
     }
-    const res=await fetch("/api/qr_codes",{
-      method:"POST",
-      headers:{"Content-type":"application/json"},
-      body:JSON.stringify(payload)
+    const res = await fetch("/api/qr_codes", {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify(payload)
     });
-    const result=await res.json();
+    const result = await res.json();
     setLoading(false);
     console.log(result);
-    if(!res.ok){
+    if (!res.ok) {
       console.log("Error!!!")
       return alert(result.error || "Failed");
     }
+    setmodalopn(true);
+    setShortUrl(result.short_url);
   }
   return (
     <div className="space-y-5">
@@ -84,16 +90,7 @@ export default function CreateQR({ defaultCampaignId = null }) {
         </Button>
       </form>
 
-      {shortUrl && (
-        <div className="mt-3 p-3 border rounded">
-          <p className="text-sm mb-2">Short URL</p>
-          <a href={shortUrl} target="_blank" rel="noreferrer" className="underline break-all">{shortUrl}</a>
-
-          <div className="mt-4 flex justify-center">
-            {/* <QRCode value={shortUrl} size={200} /> */}
-          </div>
-        </div>
-      )}
+      {shortUrl && (<QRModal open={modalopn} onClose={()=>setmodalopn(false)} link={shortUrl} ></QRModal>)}
     </div>
   )
 }

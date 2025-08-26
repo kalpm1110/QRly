@@ -1,6 +1,7 @@
-import { supabaseServer } from "@/lib/supabase"; // server-only client
+// server-only client
 import { currentUser } from "@clerk/nextjs/server";
 import CampaignList from "@/components/campaign/CampaignList";
+import { supabaseServer } from "@/lib/supabase";
 
 export default async function DashBoard() {
   const user = await currentUser();
@@ -23,7 +24,7 @@ export default async function DashBoard() {
               <li>Add your Supabase credentials:</li>
             </ol>
             <pre className="bg-gray-100 p-3 rounded mt-2 text-xs overflow-x-auto">
-{`NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+              {`NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key`}
             </pre>
@@ -37,7 +38,9 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key`}
   }
 
   try {
-    const { data: cam, error } = await supabaseServer
+    const supabase = supabaseServer();
+
+    const { data: cam, error } = await supabase
       .from("campaigns")
       .select("*")
       .eq("owner_id", user.id)

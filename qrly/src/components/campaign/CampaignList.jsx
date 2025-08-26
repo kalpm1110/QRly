@@ -5,6 +5,7 @@ import CreateQR from '../forms/CreateQR';
 import { Button } from '../ui/button';
 import CreateCambtn from './CreateCambtn';
 import CreateQrbtn from '../buttons/CreateQrbtn';
+import Link from 'next/link';
 
 function CampaignList({ cam }) {
   const handleNewQR = (qr) => {
@@ -18,10 +19,11 @@ function CampaignList({ cam }) {
           <h2 className="text-lg font-bold mb-2">{campaign.name}</h2>
           <p>Created at: {new Date(campaign.created_at).toLocaleDateString()}</p>
           <div className='flex align-middle gap-3 mt-2'>
-
-          <Button>View QR's</Button>
-          {/* Button to generate QR for this campaign */}
-          <CreateQrbtn defaultcamid={campaign.id}></CreateQrbtn>
+            <Link href={`${campaign.id}`}>
+              <Button>View QR's</Button>
+            </Link>
+            {/* Button to generate QR for this campaign */}
+            <CreateQrbtn defaultcamid={campaign.id}></CreateQrbtn>
           </div>
         </div>
       ))}

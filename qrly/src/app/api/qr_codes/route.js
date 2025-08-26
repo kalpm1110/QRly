@@ -6,7 +6,7 @@ export async function POST(req) {
     const body = await req.json();
     console.log(body);
 
-    const s = supabaseServer;
+    const s = supabaseServer();
 
     let slug = genslug(7);
     for (let i = 0; i < 5; i++) {

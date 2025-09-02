@@ -6,12 +6,22 @@ import { Button } from '../ui/button';
 import CreateCambtn from './CreateCambtn';
 import CreateQrbtn from '../buttons/CreateQrbtn';
 import Link from 'next/link';
+import useSWR from 'swr';
+
+
+const fetcher=(url)=>(fetch(url).then((res)=>res.json()));
+
 
 function CampaignList({ cam }) {
   const handleNewQR = (qr) => {
     // Refresh QR list or show toast
     console.log("New QR created:", qr);
   };
+  const {data:all}=useSWR(`/api/analytics/sync`,fetcher,{
+    refreshInterval:25000,
+  })
+
+  console.log(all)
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {cam.map((campaign) => (
@@ -24,10 +34,14 @@ function CampaignList({ cam }) {
             </Link>
             {/* Button to generate QR for this campaign */}
             <CreateQrbtn defaultcamid={campaign.id}></CreateQrbtn>
+
           </div>
         </div>
       ))}
-      <CreateCambtn></CreateCambtn>
+      <div className='flex justify-between align-middle'>
+        <CreateCambtn></CreateCambtn>
+        <CreateQrbtn defaultcamid={null}></CreateQrbtn>
+      </div>
     </div>
   )
 }

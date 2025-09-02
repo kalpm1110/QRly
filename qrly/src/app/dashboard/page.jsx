@@ -3,6 +3,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import CampaignList from "@/components/campaign/CampaignList";
 import { supabaseServer } from "@/lib/supabase";
 
+
+// const fetcher=(url)=>(fetch(url).then((res)=>res.json()));
+
 export default async function DashBoard() {
   const user = await currentUser();
   if (!user) return <div>Please sign in</div>;
@@ -46,6 +49,14 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key`}
       .eq("owner_id", user.id)
       .order("created_at", { ascending: false });
 
+    const { data: onlyqrs, err } = await supabase
+      .from("qrs")
+      .select("*")
+      .eq("owner_id", user.id)        // owner_id = user.id
+      .is("campaign_id", null)              // camid IS NULL
+      .order("created_at", { ascending: false }); // newest first
+
+
     if (error) {
       console.error('Supabase error:', error);
       return (
@@ -61,7 +72,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key`}
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">Welcome, {user.firstName}!</h1>
-        <CampaignList cam={cam || []} />
+        <CampaignList cam={cam || []} onlyqrs={onlyqrs || []} />
       </div>
     );
   } catch (error) {

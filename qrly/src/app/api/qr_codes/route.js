@@ -1,4 +1,5 @@
 import { hashpass } from "@/lib/hashpass";
+import redis from "@/lib/redis";
 import { genslug } from "@/lib/slug";
 import { supabaseServer } from "@/lib/supabase";
 
@@ -33,17 +34,21 @@ export async function POST(req) {
         return Response.json({ "error": error.message });
     }
 
-    // try {
-    //     const qid=data.id;
+    const exp = data.expires_at || 0;
 
-    // } catch (err) {
-        
-    // }
+    try {
+        const ttlsec = exp ? Math.floor((new Date(exp).getTime() - Date.now()) / 1000) : null;
 
-    console.log(process.env.NEXT_PUBLIC_APP_URL);
+        if (ttlsec && ttlsec > 0) {
+            await redis.set(`qr:${data.slug}:aval`, 1, { EX: ttlsec });
+        } else {
+            await redis.set(`qr:${data.slug}:aval`, 1);
+        }
 
-    const shorturl=`${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/,"") ?? ""}/r/${slug}`;
+    } catch (err) {
+        return Response.json({"error":err.message});
+    }
+    const shorturl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? ""}/r/${slug}`;
     console.log(shorturl);
-    return Response.json({qr:data,short_url:shorturl});
-
+    return Response.json({ qr: data, short_url: shorturl });
 }

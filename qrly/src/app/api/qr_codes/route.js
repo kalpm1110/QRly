@@ -57,6 +57,8 @@ export async function POST(req) {
         qr_id: data.id,
         total_scans: 0,
         user_id: data.owner_id, // make sure column matches your table
+        title:data.title,
+        campaign_id:data.campaign_id || NULL,
       },
     ]);
 

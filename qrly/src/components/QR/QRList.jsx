@@ -97,13 +97,19 @@ import { useEffect, useState } from "react";
 
 
 
-export function QRList({userid}) {
+export function QRList({ userid, camid }) {
   const [analytics, setanalytics] = useState([])
   const supabase = supabaseBrowser();
   useEffect(() => {
-    const fetchInitail = async (params) => {
+    if (!userid && !camid) return;
 
-      const { data, error } = await supabase.from("qranalytics").select("*").eq("user_id", userid);
+    const fetchInitail = async (params) => {
+      let query=supabase.from("qranalytics").select("*");
+      if(camid) query=query.eq("campaign_id",camid);
+      else query=query.eq("user_id",userid);
+      console.log(query);
+
+      const { data, error } = await query;
       if (!error) setanalytics(data);
 
     }
@@ -113,7 +119,7 @@ export function QRList({userid}) {
       event: "*",
       schema: "public",
       table: "qranalytics",
-      filter: `user_id=eq.${userid}`,
+      filter: camid? `campaign_id=eq.${camid}`:`user_id=eq.${userid}`,
     },
       (payload) => {
         console.log("Realtime data", payload);
@@ -140,7 +146,7 @@ export function QRList({userid}) {
       <ul>
         {analytics.map((a) => (
           <li key={a.id}>
-            QR: {a.qr_id} | Scans: {a.total_scans}
+            QR: {a.qr_id} | Scans: {a.total_scans} | Title:{a.title}
           </li>
         ))}
       </ul>

@@ -4,60 +4,67 @@ import { genslug } from "@/lib/slug";
 import { supabaseServer } from "@/lib/supabase";
 
 export async function POST(req) {
+  try {
     const body = await req.json();
-    console.log(body);
-
     const s = supabaseServer();
 
+    // Generate unique slug
     let slug = genslug(7);
     for (let i = 0; i < 5; i++) {
-        const { data: existing } = await s.from("qrs").select("id").eq("slug", slug).maybeSingle();
-        if (!existing) break;
-        slug = genslug(7);
+      const { data: existing } = await s.from("qrs").select("id").eq("slug", slug).maybeSingle();
+      if (!existing) break;
+      slug = genslug(7);
     }
 
+    // Hash password if provided
     const hpass = body.reqpass ? hashpass(body.password) : null;
-    const insertload = {
-        title: body.title,
-        owner_id: body.owner_id,
-        slug,
-        campaign_id: body.campaign_id || null,
-        url: body.url,
-        max_scans:body.max_scans,
-        password: hpass,
-        expires_at: body.expires_at ?? null,
+
+    // Prepare insert payload
+    const insertLoad = {
+      title: body.title,
+      owner_id: body.owner_id,
+      slug,
+      campaign_id: body.campaign_id || null,
+      url: body.url,
+      max_scans: body.max_scans,
+      password: hpass,
+      expires_at: body.expires_at ?? null,
+    };
+
+    // Insert QR in Supabase
+    const { data, error } = await s.from("qrs").insert(insertLoad).select("*").single();
+    if (error) return Response.json({ error: error.message }, { status: 400 });
+
+    // Set expiry in Redis
+    const ttlSec = data.expires_at
+      ? Math.floor((new Date(data.expires_at).getTime() - Date.now()) / 1000)
+      : null;
+
+    if (ttlSec && ttlSec > 0) {
+      await redis.set(`qr:${data.slug}:aval`, 1, { EX: ttlSec });
+    } else {
+      await redis.set(`qr:${data.slug}:aval`, 1); // no expiry
     }
+    await redis.set(`qr:${data.slug}:scans`,0);
+    // Cache QR data in Redis for faster access
+    await redis.set(`qr:${data.slug}:url`, data.url);
+    await redis.set(`qr:${data.slug}:max_scans`, Number(data.max_scans));
+    await redis.set(`qr:${data.slug}:id`, data.id);
 
-    const { data, error } = await s.from("qrs").insert(insertload).select("*").single();
-
-    if (error) {
-        console.error("Supabase insert error:", error);
-        return Response.json({ "error": error.message });
-    }
-
-    const exp = data.expires_at || 0;
-
-    try {
-        const ttlsec = exp ? Math.floor((new Date(exp).getTime() - Date.now()) / 1000) : null;
-
-        if (ttlsec && ttlsec > 0) {
-            await redis.set(`qr:${data.slug}:aval`, 1, { EX: ttlsec });
-        } else {
-            await redis.set(`qr:${data.slug}:aval`, 1);
-        }
-
-    } catch (err) {
-        return Response.json({"error":err.message});
-    }
-    const shorturl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? ""}/r/${slug}`;
-    console.log(shorturl);
+    // Initialize analytics row in Supabase
     await s.from("qranalytics").insert([
-        {
-            qr_id:data.id,
-            total_scans:0,
-            user_id:data.owner_id
-        }
+      {
+        qr_id: data.id,
+        total_scans: 0,
+        user_id: data.owner_id, // make sure column matches your table
+      },
+    ]);
 
-    ])
-    return Response.json({ qr: data, short_url: shorturl });
+    const shortUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? ""}/r/${slug}`;
+
+    return Response.json({ qr: data, short_url: shortUrl });
+  } catch (err) {
+    console.error("Error creating QR:", err);
+    return Response.json({ error: err.message }, { status: 500 });
+  }
 }

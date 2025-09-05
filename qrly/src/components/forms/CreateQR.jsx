@@ -16,7 +16,7 @@ export default function CreateQR({ defaultCampaignId = null }) {
   const [campaignId, setCampaignId] = useState(defaultCampaignId);
   const [password, setPassword] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
-  const [maxScans, setMaxScans] = useState("");
+  const [maxScans, setMaxScans] = useState(0);
   const [shortUrl, setShortUrl] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +30,7 @@ export default function CreateQR({ defaultCampaignId = null }) {
       owner_id: user.id,
       campaign_id: defaultCampaignId || null,
       reqpass,
-      max_scans:maxScans,
+      max_scans:maxScans || 0 ,
       url: targetUrl,
       password: reqpass ? password : undefined,
       expires_at: expiresAt ? new Date(expiresAt).toISOString() : undefined,

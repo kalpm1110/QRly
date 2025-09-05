@@ -23,6 +23,7 @@ export async function POST(req) {
         slug,
         campaign_id: body.campaign_id || null,
         url: body.url,
+        max_scans:body.max_scans,
         password: hpass,
         expires_at: body.expires_at ?? null,
     }
@@ -50,5 +51,13 @@ export async function POST(req) {
     }
     const shorturl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? ""}/r/${slug}`;
     console.log(shorturl);
+    await s.from("qranalytics").insert([
+        {
+            qr_id:data.id,
+            total_scans:0,
+            user_id:data.owner_id
+        }
+
+    ])
     return Response.json({ qr: data, short_url: shorturl });
 }

@@ -24,7 +24,9 @@ export default async function QRpage({params}) {
     if(hasreach>qr.max_scans) return <div>Max Scans has reached</div>
 
 
-    await redis.incr(`qr:${slug}:scans`);
+    await redis.incr(key1);
+    await supabase.rpc("increment_scan",{qr_id:qr.id});
+
 
     redirect(qr.url);
 }

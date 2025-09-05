@@ -2,7 +2,8 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { supabaseServer } from '@/lib/supabase';
 import React from 'react'
-import QRList from '@/components/QR/QRList';
+import { QRList } from '@/components/QR/QRList';
+
 
 export default async function CamQR({ params }) {
   const user = await currentUser();
@@ -21,7 +22,7 @@ export default async function CamQR({ params }) {
   return (
     <div>
       CamQr for the {camid}!
-      <QRList qrs={qrs}></QRList>
+      <QRList qrs={qrs} campaignId={camid}></QRList>
     </div>
   )
 }

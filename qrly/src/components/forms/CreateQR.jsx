@@ -16,7 +16,7 @@ export default function CreateQR({ defaultCampaignId = null }) {
   const [campaignId, setCampaignId] = useState(defaultCampaignId);
   const [password, setPassword] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
-  // const [maxScans, setMaxScans] = useState("");
+  const [maxScans, setMaxScans] = useState("");
   const [shortUrl, setShortUrl] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +30,7 @@ export default function CreateQR({ defaultCampaignId = null }) {
       owner_id: user.id,
       campaign_id: defaultCampaignId || null,
       reqpass,
+      max_scans:maxScans,
       url: targetUrl,
       password: reqpass ? password : undefined,
       expires_at: expiresAt ? new Date(expiresAt).toISOString() : undefined,
@@ -79,10 +80,10 @@ export default function CreateQR({ defaultCampaignId = null }) {
             <Label>Expires at (optional)</Label>
             <Input type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
           </div>
-          {/* <div>
-            <Label>Max scans (optional)</Label>
+          <div>
+            <Label>Max scans</Label>
             <Input type="number" min={1} value={maxScans} onChange={(e) => setMaxScans(e.target.value)} />
-          </div> */}
+          </div>
         </div>
 
         <Button type="submit" disabled={loading} className="w-full">

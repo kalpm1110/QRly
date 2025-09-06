@@ -120,3 +120,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+body {
+  @apply bg-[#E5E5CB] text-[#1A120B];
+}
+
+button {
+  @apply transition-colors duration-300;
+}
+
+a {
+  @apply transition-colors duration-200;
+}
+
+/* Custom styles for Clerk components */
+.clerk-button {
+  @apply bg-[#1A120B] text-[#E5E5CB] hover:bg-[#3C2A21] rounded-lg px-4 py-2;
+}

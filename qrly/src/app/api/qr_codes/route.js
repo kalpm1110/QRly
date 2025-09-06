@@ -16,10 +16,9 @@ export async function POST(req) {
       slug = genslug(7);
     }
 
-    // Hash password if provided
+
     const hpass = body.reqpass ? hashpass(body.password) : null;
 
-    // Prepare insert payload
     const insertLoad = {
       title: body.title,
       owner_id: body.owner_id,
@@ -31,11 +30,21 @@ export async function POST(req) {
       expires_at: body.expires_at ?? null,
     };
 
-    // Insert QR in Supabase
+
     const { data, error } = await s.from("qrs").insert(insertLoad).select("*").single();
     if (error) return Response.json({ error: error.message }, { status: 400 });
-
-    // Set expiry in Redis
+    const shortUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? ""}/r/${slug}`;
+    await s.from("qranalytics").insert([
+      {
+        qr_id: data.id,
+        total_scans: 0,
+        user_id: data.owner_id,
+        title: data.title,
+        campaign_id: data.campaign_id || NULL,
+        url: shortUrl,
+        expire_at: data.expires_at,
+      },
+    ]);
     const ttlSec = data.expires_at
       ? Math.floor((new Date(data.expires_at).getTime() - Date.now()) / 1000)
       : null;
@@ -45,24 +54,13 @@ export async function POST(req) {
     } else {
       await redis.set(`qr:${data.slug}:aval`, 1); // no expiry
     }
-    await redis.set(`qr:${data.slug}:scans`,0);
-    // Cache QR data in Redis for faster access
+    await redis.set(`qr:${data.slug}:scans`, 0);
+
     await redis.set(`qr:${data.slug}:url`, data.url);
     await redis.set(`qr:${data.slug}:max_scans`, Number(data.max_scans));
     await redis.set(`qr:${data.slug}:id`, data.id);
 
-    // Initialize analytics row in Supabase
-    await s.from("qranalytics").insert([
-      {
-        qr_id: data.id,
-        total_scans: 0,
-        user_id: data.owner_id, // make sure column matches your table
-        title:data.title,
-        campaign_id:data.campaign_id || NULL,
-      },
-    ]);
 
-    const shortUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? ""}/r/${slug}`;
 
     return Response.json({ qr: data, short_url: shortUrl });
   } catch (err) {

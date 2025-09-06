@@ -2,45 +2,75 @@ import redis from "@/lib/redis";
 import { supabaseServer } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 
+// Helper function to fetch QR data from Redis or Supabase
+async function getQR(slug, supabase) {
+  let [url, maxScans, qrId] = await redis.mget(
+    `qr:${slug}:url`,
+    `qr:${slug}:max_scans`,
+    `qr:${slug}:id`
+  );
+
+  if (!url || !maxScans || !qrId) {
+    const { data: qr, error } = await supabase
+      .from("qrs")
+      .select("*")
+      .eq("slug", slug)
+      .single();
+
+    if (error || !qr) throw new Error("QR not found");
+
+    url = qr.url;
+    maxScans = qr.max_scans;
+    qrId = qr.id;
+
+    await redis.set(`qr:${slug}:url`, url);
+    await redis.set(`qr:${slug}:max_scans`, maxScans);
+    await redis.set(`qr:${slug}:id`, qrId);
+
+    console.log("Fetched QR from Supabase");
+  } else {
+    console.log("Using Redis cache");
+  }
+
+  return {
+    url,
+    maxScans: Number(maxScans),
+    qrId,
+  };
+}
+
 export default async function QRpage({ params }) {
-    const { slug } = await params;
-    console.log(slug);
+  const { slug } = await params;
 
-    const key = `qr:${slug}:aval`;
-    const isexp = await redis.get(key);
-    if (isexp === null) return <div>Scanned QR is Expired!</div>
+  const keyActive = `qr:${slug}:aval`;
+  const isActive = await redis.get(keyActive);
+  if (isActive === null) return <div>Scanned QR is Expired!</div>;
 
-    const supabase = supabaseServer();
-    let d;
-    d = await redis.get(`qr:${slug}:url`);
-    let m;
-    m = Number(await redis.get(`qr:${slug}:max_scans`));
-    let i;
-    console.log(`qr:${slug}:id`)
-    i = await redis.get(`qr:${slug}:id`)
-    console.log(d,m,i);
-    if (!d || !m || !i) {
-        const { data: qr, error } = await supabase.from("qrs").select("*").eq("slug", slug).single();
-        if (error || !qr) return new Response("QR not found", { status: 404 });
-        d = qr.url;
-        m = qr.max_scans;
-        i = qr.id
-        console.log("Using Supabase");
-        // store in Redis for next requests
-        await redis.set(`qr:${slug}:url`, d);
-        await redis.set(`qr:${slug}:max_scans`, m);
-        await redis.set(`qr:${slug}:id`, i);
-    } else console.log("using redis")
+  const supabase = supabaseServer();
+  let qrData;
+  try {
+    qrData = await getQR(slug, supabase);
+  } catch (err) {
+    return new Response("QR not found", { status: 404 });
+  }
+
+  const keyScans = `qr:${slug}:scans`;
+  const scansRaw = await redis.get(keyScans);
+  const scans = scansRaw ? Number(scansRaw) : 0;
+
+  if (scans >= qrData.maxScans) return <div>Max Scans has reached</div>;
 
 
-    const key1 = `qr:${slug}:scans`;
-    const hasreach = Number(await redis.get(key1));
-    if (hasreach >= m) return <div>Max Scans has reached</div>
 
+  await redis.incr(keyScans);
+  supabase.rpc("increment_scan", { qr_id: qrData.qrId })
+    .then(() => console.log("Supabase scans updated"))
+    .catch(err => console.error("Supabase RPC failed", err));
 
-    await redis.incr(key1);
-    await supabase.rpc("increment_scan", { qr_id: i });
+  // const redisPromise = redis.incr(keyScans);
+  // const supabasePromise = supabase.rpc("increment_scan", { qr_id: qrData.qrId });
 
+  // await Promise.all([redisPromise, supabasePromise]);
 
-    redirect(d);
+  redirect(qrData.url);
 }

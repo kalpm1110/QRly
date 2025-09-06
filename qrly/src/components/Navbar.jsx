@@ -1,44 +1,39 @@
-// components/Navbar.js
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react"; // install lucide-react for icons
+import { Menu, X } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <nav className="bg-gray-900 text-white shadow-md sticky top-0 z-50">
+        <nav className="bg-[#1A120B] text-[#E5E5CB] shadow-lg sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <div className="flex-shrink-0 text-2xl font-bold tracking-wide">
-                        <Link href="/">QRly</Link>
+                    <div className="flex-shrink-0">
+                        <Link href="/" className="text-3xl font-bold tracking-tight hover:text-[#D5CEA3] transition-colors">
+                            QRly
+                        </Link>
                     </div>
 
                     {/* Desktop Menu */}
-                    <div className="hidden md:flex space-x-8 text-lg">
-                        <Link href="/dashboard" className="hover:text-blue-400 transition-colors">
+                    <div className="hidden md:flex items-center space-x-8 text-lg">
+                        <Link href="/dashboard" className="hover:text-[#D5CEA3] transition-colors duration-200">
                             Home
                         </Link>
-                        <Link href="/about" className="hover:text-blue-400 transition-colors">
-                            About
+                        <Link href="/yourqrs" className="hover:text-[#D5CEA3] transition-colors duration-200">
+                            YourQrs
                         </Link>
-                        <Link href="/services" className="hover:text-blue-400 transition-colors">
-                            Services
-                        </Link>
-                        <Link href="/contact" className="hover:text-blue-400 transition-colors">
-                            Contact
-                        </Link>
-                        <UserButton></UserButton>
+                        <UserButton />
                     </div>
 
                     {/* Mobile Hamburger */}
                     <div className="md:hidden">
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="focus:outline-none"
+                            className="focus:outline-none text-[#E5E5CB] hover:text-[#D5CEA3] transition-colors"
                         >
                             {isOpen ? <X size={28} /> : <Menu size={28} />}
                         </button>
@@ -48,37 +43,20 @@ export default function Navbar() {
 
             {/* Mobile Menu */}
             {isOpen && (
-                <div className="md:hidden bg-gray-800 px-4 py-3 space-y-2">
+                <div className="md:hidden bg-[#3C2A21] px-4 py-4 space-y-4">
                     <Link
                         href="/dashboard"
-                        className="block hover:text-blue-400 transition-colors"
+                        className="block text-[#E5E5CB] hover:text-[#D5CEA3] transition-colors text-lg"
                         onClick={() => setIsOpen(false)}
                     >
                         Home
                     </Link>
-                    <Link
-                        href="/about"
-                        className="block hover:text-blue-400 transition-colors"
-                        onClick={() => setIsOpen(false)}
-                    >
-                        About
+                    <Link href="/yourqrs" className="hover:text-[#D5CEA3] transition-colors duration-200">
+                        YourQrs
                     </Link>
-                    <Link
-                        href="/services"
-                        className="block hover:text-blue-400 transition-colors"
-                        onClick={() => setIsOpen(false)}
-                    >
-                        Services
-                    </Link>
-                    <Link
-                        href="/contact"
-                        className="block hover:text-blue-400 transition-colors"
-                        onClick={() => setIsOpen(false)}
-                    >
-                        Contact
-                    <UserButton></UserButton>
-                    </Link>
-
+                    <div className="flex justify-start">
+                        <UserButton />
+                    </div>
                 </div>
             )}
         </nav>

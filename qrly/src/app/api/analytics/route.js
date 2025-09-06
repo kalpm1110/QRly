@@ -1,4 +1,4 @@
-// /api/analytics/route.js
+
 import { supabaseServer } from "@/lib/supabase";
 import redis from "@/lib/redis";
 

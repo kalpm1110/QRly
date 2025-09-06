@@ -40,9 +40,9 @@ export async function POST(req) {
         total_scans: 0,
         user_id: data.owner_id,
         title: data.title,
-        campaign_id: data.campaign_id || NULL,
+        campaign_id: data.campaign_id ?? null,
         url: shortUrl,
-        expire_at: data.expires_at,
+        expire_at: data.expires_at ?? null,
       },
     ]);
     const ttlSec = data.expires_at

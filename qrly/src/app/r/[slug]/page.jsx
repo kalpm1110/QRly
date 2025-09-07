@@ -57,8 +57,11 @@ export default async function QRpage({ params }) {
   const keyScans = `qr:${slug}:scans`;
   const scansRaw = await redis.get(keyScans);
   const scans = scansRaw ? Number(scansRaw) : 0;
+  const maxScans = Number(qrData.maxScans);
 
-  if (scans >= qrData.maxScans) return <div>Max Scans has reached</div>;
+  if (maxScans !== -1 && scans >= maxScans) {
+    return <div>Max Scans has reached</div>;
+  }
 
 
 
@@ -66,11 +69,6 @@ export default async function QRpage({ params }) {
   supabase.rpc("increment_scan", { qr_id: qrData.qrId })
     .then(() => console.log("Supabase scans updated"))
     .catch(err => console.error("Supabase RPC failed", err));
-
-  // const redisPromise = redis.incr(keyScans);
-  // const supabasePromise = supabase.rpc("increment_scan", { qr_id: qrData.qrId });
-
-  // await Promise.all([redisPromise, supabasePromise]);
 
   redirect(qrData.url);
 }

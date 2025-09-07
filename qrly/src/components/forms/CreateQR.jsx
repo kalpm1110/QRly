@@ -9,13 +9,11 @@ import QRModal from '../QR/QRModal';
 
 export default function CreateQR({ defaultCampaignId = null }) {
   const { user } = useUser();
-  const [reqpass, setreqpass] = useState(false);
   const [title, setTitle] = useState("");
   const [targetUrl, setTargetUrl] = useState("");
   const [campaignId, setCampaignId] = useState(defaultCampaignId);
-  const [password, setPassword] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
-  const [maxScans, setMaxScans] = useState(0);
+  const [maxScans, setMaxScans] = useState(-1);
   const [shortUrl, setShortUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [modalopn, setmodalopn] = useState(false);
@@ -27,10 +25,8 @@ export default function CreateQR({ defaultCampaignId = null }) {
       title,
       owner_id: user.id,
       campaign_id: defaultCampaignId || null,
-      reqpass,
       max_scans: maxScans || 0,
       url: targetUrl,
-      password: reqpass ? password : undefined,
       expires_at: expiresAt ? new Date(expiresAt).toISOString() : undefined,
     };
     const res = await fetch("/api/qr_codes", {
@@ -71,25 +67,7 @@ export default function CreateQR({ defaultCampaignId = null }) {
             className="bg-[#E5E5CB] border-[#3C2A21]/20 focus:border-[#3C2A21] focus:ring-[#D5CEA3]"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="pw"
-            checked={reqpass}
-            onCheckedChange={(v) => setreqpass(Boolean(v))}
-            className="border-[#3C2A21] data-[state=checked]:bg-[#1A120B] data-[state=checked]:text-[#E5E5CB]"
-          />
-          <Label htmlFor="pw" className="text-[#1A120B] font-medium">Password protect</Label>
-        </div>
-        {reqpass && (
-          <div>
-            <Label className="text-[#1A120B] font-medium">Password</Label>
-            <Input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-[#E5E5CB] border-[#3C2A21]/20 focus:border-[#3C2A21] focus:ring-[#D5CEA3]"
-            />
-          </div>
-        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label className="text-[#1A120B] font-medium">Expires at (optional)</Label>
@@ -104,12 +82,14 @@ export default function CreateQR({ defaultCampaignId = null }) {
             <Label className="text-[#1A120B] font-medium">Max scans</Label>
             <Input
               type="number"
-              min={1}
+              placeholder="-1 for No Limit"
               value={maxScans}
               onChange={(e) => setMaxScans(e.target.value)}
               className="bg-[#E5E5CB] border-[#3C2A21]/20 focus:border-[#3C2A21] focus:ring-[#D5CEA3]"
             />
           </div>
+          <p className="col-span-1 sm:col-span-2 text-center text-[#1A120B] text-xs opacity-60 mt-1">* -1 for No Scans Limit</p>
+
         </div>
         <Button
           type="submit"

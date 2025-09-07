@@ -34,9 +34,13 @@ function CampaignList({ cam }) {
           </div>
         ))}
       </div>
-      <div className="flex flex-col sm:flex-row justify-center align-middle gap-8 sm:gap-4 mt-6">
-        <CreateCambtn />
-        <CreateQrbtn defaultcamid={null} />
+      <div className="flex flex-row sm:flex-row justify-center items-center gap-3 sm:gap-4 mt-6 w-full max-w-md mx-auto sm:max-w-lg">
+        <div>
+          <CreateCambtn />
+        </div>
+        <div >
+          <CreateQrbtn defaultcamid={null} />
+        </div>
       </div>
     </div>
   );

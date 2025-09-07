@@ -45,7 +45,7 @@ function QRModal({ open, onClose, link }) {
           </DialogTitle>
         </DialogHeader>
         <div className="flex justify-center p-4 bg-[#D5CEA3] rounded-xl">
-          <QRCode ref={qrref} value={link} size={200} className="rounded-xl" />
+          <QRCode ref={qrref} value={link} size={200} fgColor="#1A120B" bgColor="transparent" className="rounded-xl" />
         </div>
         <div className="flex items-center gap-2 mt-4">
           <input

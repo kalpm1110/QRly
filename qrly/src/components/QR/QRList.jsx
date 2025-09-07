@@ -16,7 +16,7 @@ export function QRList({ userid, camid }) {
 
     const fetchInitial = async () => {
       setLoading(true);
-      let query = supabase.from("qranalytics").select("id, url, total_scans, expire_at, campaign_id, user_id");
+      let query = supabase.from("qranalytics").select("id, url, total_scans, expire_at, campaign_id,target_url,title,user_id");
       if (camid) query = query.eq("campaign_id", camid);
       else query = query.eq("user_id", userid);
 

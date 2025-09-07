@@ -8,6 +8,7 @@ export function QRList({ userid, camid }) {
   const [loading, setLoading] = useState(true);
   const supabase = supabaseBrowser();
 
+
   useEffect(() => {
     if (!userid && !camid) {
       setLoading(false);
@@ -16,7 +17,7 @@ export function QRList({ userid, camid }) {
 
     const fetchInitial = async () => {
       setLoading(true);
-      let query = supabase.from("qranalytics").select("id, url, total_scans, expire_at, campaign_id,target_url,title,user_id");
+      let query = supabase.from("qranalytics").select("id, url,qr_id, total_scans, expire_at, campaign_id,target_url,title,user_id");
       if (camid) query = query.eq("campaign_id", camid);
       else query = query.eq("user_id", userid);
 
@@ -49,10 +50,23 @@ export function QRList({ userid, camid }) {
       )
       .subscribe();
 
+    // const handleFocus=()=>{
+    //   console.log("TabFocused");
+    //   fetchInitial();
+    // }
+    // window.addEventListener("focus",handleFocus);
+
     return () => {
       supabase.removeChannel(channel);
+      // window.removeEventListener("focus",handleFocus);
     };
   }, [userid, camid]);
+
+
+  const filterdata=(id) => {
+    setanalytics(analytics.filter((q)=>q.qr_id!==id));
+    console.log("filtered")
+  }
 
   return (
     <div>
@@ -72,7 +86,7 @@ export function QRList({ userid, camid }) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {analytics.map((a) => (
-            <QRcard key={a.id} a={a} />
+            <QRcard key={a.id} a={a} onDelete={filterdata} />
           ))}
         </div>
       )}

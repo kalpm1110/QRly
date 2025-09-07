@@ -17,7 +17,7 @@ export default async function CamQR({ params }) {
 
   return (
     <div className="min-h-screen bg-[#E5E5CB] p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold text-[#1A120B] mb-6">QR Codes for Campaign {camid}</h1>
+      <h1 className="text-3xl text-center font-bold text-[#1A120B] mb-6">QR Codes for Campaign</h1>
       <QRList camid={camid} userid={user.id} />
     </div>
   );

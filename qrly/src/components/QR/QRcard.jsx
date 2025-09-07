@@ -1,29 +1,30 @@
 "use client";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Link as LinkIcon, Activity, QrCode, Download } from "lucide-react";
+import { Calendar, Link as LinkIcon, Activity, QrCode, Download, Trash2 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { Button } from "../ui/button";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
-export default function QRcard({ a }) {
-  const qrref = useRef();
+export default function QRcard({ a, onDelete }) {
+  const [loading, setLoading] = useState(false);
+  const qrRef = useRef();
   const expiryDate = a.expire_at
     ? new Date(a.expire_at).toLocaleString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : null;
 
   const isExpired = a.expire_at ? new Date(a.expire_at) < new Date() : false;
   const statusText = isExpired ? "Expired" : "Active";
   const handleDownload = () => {
-    if (!qrref.current) return;
+    if (!qrRef.current) return;
     const serializer = new XMLSerializer();
-    const source = serializer.serializeToString(qrref.current);
+    const source = serializer.serializeToString(qrRef.current);
     const img = new Image();
     img.src = "data:image/svg+xml;base64," + btoa(source);
     img.onload = () => {
@@ -35,38 +36,64 @@ export default function QRcard({ a }) {
       ctx.fillStyle = "#E5E5CB";
       ctx.fillRect(0, 0, size, size);
       ctx.drawImage(img, 0, 0, size, size);
-      const pnguri = canvas.toDataURL("image/png");
+      const pngUri = canvas.toDataURL("image/png");
       const a = document.createElement("a");
-      a.href = pnguri;
+      a.href = pngUri;
       a.download = "QR-Code.png";
       a.click();
     };
   };
 
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/qr_codes", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          qrId: a.qr_id,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        onDelete(a.qr_id);
+      } else {
+        alert(data.error || "Something went wrong");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete QR");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Card className="bg-[#E5E5CB] border-[#3C2A21]/20 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-4">
-      <CardHeader className="flex flex-col items-center space-y-3 pb-3">
-        <span className="flex items-center gap-1 text-[#3C2A21]">
-          <QrCode size={18}></QrCode>
+    <Card className="relative bg-[#E5E5CB] border-[#3C2A21]/20 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-4 max-w-xs">
+      <button
+        onClick={handleDelete}
+        disabled={loading}
+        className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-red-100 transition-colors duration-200"
+        aria-label="Delete QR Code"
+      >
+        <Trash2 className={`h-5 w-5 ${loading ? "text-red-300" : "text-red-500"}`} />
+      </button>
+      <CardHeader className="flex flex-col items-center space-y-4 pb-2">
+        <span className="flex items-center gap-1 text-[#3C2A21] font-semibold text-lg">
+          <QrCode size={20} />
           {a?.title}
         </span>
-        <div className="p-3 bg-[#D5CEA3] rounded-lg">
-          <QRCode size={100} value={a?.url} fgColor="#1A120B" bgColor="transparent" ref={qrref} />
+        <div className="p-4 bg-[#D5CEA3] rounded-lg shadow-inner">
+          <QRCode size={120} value={a?.url} fgColor="#1A120B" bgColor="transparent" ref={qrRef} />
         </div>
-        <div className="flex items-center space-x-2 text-sm text-[#3C2A21]">
-          {!isExpired ? <Button
-            onClick={handleDownload}
-            className="bg-[#E5E5CB] text-[#3C2A21] hover:bg-[#E5E5CB] "
-
-          >
-            <Download className="h-4 w-4 mr-2" />
-          </Button>: ""}
-          <LinkIcon size={14} />
+        <div className="flex items-center justify-center space-x-3 text-sm text-[#3C2A21]">
+          <LinkIcon size={16} />
           <a
             href={a.target_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="truncate max-w-[200px] hover:text-[#D5CEA3] transition-colors duration-200"
+            className="truncate max-w-[180px] hover:text-[#1A120B] transition-colors duration-200 underline"
           >
             {a.target_url}
           </a>
@@ -74,30 +101,39 @@ export default function QRcard({ a }) {
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
         <div className="flex justify-between items-center">
-          <span className="flex items-center gap-1 text-[#3C2A21]">
-            <Activity size={13} />
+          <span className="flex items-center gap-1.5 text-[#3C2A21]">
+            <Activity size={14} />
             Scans
           </span>
           <span className="font-semibold text-[#1A120B]">{a.total_scans ?? 0}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="flex items-center gap-1 text-[#3C2A21]">
-            <Calendar size={13} />
+          <span className="flex items-center gap-1.5 text-[#3C2A21]">
+            <Calendar size={14} />
             Expiry
           </span>
           <span className="text-[#3C2A21]">{expiryDate ?? "—"}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-[#3C2A21]">Status</span>
+          <span className="text-[#3C2A21] font-medium">Status</span>
           <Badge
-            className={`px-2 py-0.5 text-xs rounded-md ${isExpired
-              ? "bg-[#3C2A21]/20 text-[#3C2A21]"
-              : "bg-[#D5CEA3]/50 text-[#1A120B]"
-              }`}
+            className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${
+              isExpired ? "bg-[#3C2A21]/20 text-[#3C2A21]" : "bg-[#D5CEA3] text-[#1A120B]"
+            }`}
           >
             {statusText}
           </Badge>
         </div>
+        {!isExpired && (
+          <Button
+            onClick={handleDownload}
+            className="w-full mt-3 bg-[#D5CEA3] text-[#1A120B] hover:bg-[#3C2A21] hover:text-[#E5E5CB] transition-colors duration-200 rounded-md py-2"
+            disabled={loading}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Download QR
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

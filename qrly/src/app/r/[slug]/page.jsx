@@ -2,7 +2,7 @@ import redis from "@/lib/redis";
 import { supabaseServer } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 
-// Helper function to fetch QR data from Redis or Supabase
+
 async function getQR(slug, supabase) {
   let [url, maxScans, qrId] = await redis.mget(
     `qr:${slug}:url`,
@@ -44,6 +44,7 @@ export default async function QRpage({ params }) {
 
   const keyActive = `qr:${slug}:aval`;
   const isActive = await redis.get(keyActive);
+  console.log(isActive);
   if (isActive === null) return <div>Scanned QR is Expired!</div>;
 
   const supabase = supabaseServer();

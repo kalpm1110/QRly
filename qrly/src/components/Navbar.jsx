@@ -30,13 +30,14 @@ export default function Navbar() {
                     </div>
 
                     {/* Mobile Hamburger */}
-                    <div className="md:hidden">
+                    <div className="md:hidden flex items-center space-x-8 text-lg ">
                         <button
                             onClick={() => setIsOpen(!isOpen)}
                             className="focus:outline-none text-[#E5E5CB] hover:text-[#D5CEA3] transition-colors"
                         >
                             {isOpen ? <X size={28} /> : <Menu size={28} />}
                         </button>
+                        <UserButton className="mr-3"></UserButton>
                     </div>
                 </div>
             </div>
@@ -54,9 +55,6 @@ export default function Navbar() {
                     <Link href="/yourqrs" className="hover:text-[#D5CEA3] transition-colors duration-200">
                         YourQrs
                     </Link>
-                    <div className="flex justify-start">
-                        <UserButton />
-                    </div>
                 </div>
             )}
         </nav>

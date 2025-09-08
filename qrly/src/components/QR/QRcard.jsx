@@ -8,41 +8,53 @@ import { useRef, useState } from "react";
 
 export default function QRcard({ a, onDelete }) {
   const [loading, setLoading] = useState(false);
-  const qrRef = useRef();
+  const qrref = useRef();
   const expiryDate = a.expire_at
     ? new Date(a.expire_at).toLocaleString("en-IN", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     : null;
 
   const isExpired = a.expire_at ? new Date(a.expire_at) < new Date() : false;
   const statusText = isExpired ? "Expired" : "Active";
   const handleDownload = () => {
-    if (!qrRef.current) return;
+    if (!qrref.current) return;
+    const svg = qrref.current.querySelector("svg");
+    if (!svg) return;
+
     const serializer = new XMLSerializer();
-    const source = serializer.serializeToString(qrRef.current);
+    const source = serializer.serializeToString(svg);
+
     const img = new Image();
     img.src = "data:image/svg+xml;base64," + btoa(source);
+
     img.onload = () => {
+      const qrSize = 200;       
+      const padding = 20;  
+      const totalSize = qrSize + padding * 2;
+
       const canvas = document.createElement("canvas");
-      const size = 256;
-      canvas.width = size;
-      canvas.height = size;
+      canvas.width = totalSize;
+      canvas.height = totalSize;
       const ctx = canvas.getContext("2d");
+
       ctx.fillStyle = "#E5E5CB";
-      ctx.fillRect(0, 0, size, size);
-      ctx.drawImage(img, 0, 0, size, size);
-      const pngUri = canvas.toDataURL("image/png");
+      ctx.fillRect(0, 0, totalSize, totalSize);
+
+      ctx.drawImage(img, padding, padding, qrSize, qrSize);
+
+      const pnguri = canvas.toDataURL("image/png");
       const a = document.createElement("a");
-      a.href = pngUri;
+      a.href = pnguri;
       a.download = "QR-Code.png";
       a.click();
     };
   };
+
 
   const handleDelete = async () => {
     try {
@@ -84,8 +96,8 @@ export default function QRcard({ a, onDelete }) {
           <QrCode size={20} />
           {a?.title}
         </span>
-        <div className="p-4 bg-[#D5CEA3] rounded-lg shadow-inner">
-          <QRCode size={120} value={a?.url} fgColor="#1A120B" bgColor="transparent" ref={qrRef} />
+        <div className="p-4 bg-[#D5CEA3] rounded-lg shadow-inner" ref={qrref}>
+          <QRCode size={120} value={a?.url} fgColor="#1A120B" bgColor="transparent" />
         </div>
         <div className="flex items-center justify-center space-x-3 text-sm text-[#3C2A21]">
           <LinkIcon size={16} />
@@ -117,9 +129,8 @@ export default function QRcard({ a, onDelete }) {
         <div className="flex justify-between items-center">
           <span className="text-[#3C2A21] font-medium">Status</span>
           <Badge
-            className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${
-              isExpired ? "bg-[#3C2A21]/20 text-[#3C2A21]" : "bg-[#D5CEA3] text-[#1A120B]"
-            }`}
+            className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${isExpired ? "bg-[#3C2A21]/20 text-[#3C2A21]" : "bg-[#D5CEA3] text-[#1A120B]"
+              }`}
           >
             {statusText}
           </Badge>

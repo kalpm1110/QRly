@@ -10,6 +10,7 @@ import {
 } from '@clerk/nextjs'
 import Navbar from "@/components/Navbar";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

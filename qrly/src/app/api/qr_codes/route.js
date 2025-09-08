@@ -44,7 +44,6 @@ export async function POST(req) {
     const ttlSec = data.expires_at
       ? Math.floor((new Date(data.expires_at).getTime() - Date.now()) / 1000)
       : null;
-    console.log(ttlSec);
     if (ttlSec && ttlSec > 0) {
       await redis.set(`qr:${data.slug}:aval`, 1, { ex: ttlSec });
       await redis.set(`qr:${data.slug}:scans`, 0, { ex: ttlSec });

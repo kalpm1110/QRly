@@ -88,7 +88,7 @@ export default function CreateQR({ defaultCampaignId = null }) {
               className="bg-[#E5E5CB] border-[#3C2A21]/20 focus:border-[#3C2A21] focus:ring-[#D5CEA3]"
             />
           </div>
-          <p className="col-span-1 sm:col-span-2 text-center text-[#1A120B] text-xs opacity-60 mt-1">* -1 for No Scans Limit</p>
+          <p className="font-bold col-span-1 sm:col-span-2 text-center text-[#1A120B] text-xs opacity-80 mt-1">* -1 for No Scans Limit</p>
 
         </div>
         <Button

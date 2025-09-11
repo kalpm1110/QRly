@@ -86,8 +86,8 @@ export default function QRcard({ a, onDelete, onUpdate }) {
 
   return (
     <Card className="relative bg-[#E5E5CB] border-[#3C2A21]/20 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-4 max-w-xs group">
-      {/* Action buttons in top right */}
-      <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+
+      <div className="absolute top-3 right-3 flex gap-1 transition-opacity duration-200">
         <button
           onClick={handleDelete}
           disabled={loading}
@@ -98,8 +98,7 @@ export default function QRcard({ a, onDelete, onUpdate }) {
         </button>
       </div>
 
-      {/* Edit button in top left */}
-      <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div className="absolute top-3 left-3  transition-opacity duration-200">
         <EditQrbtn qrData={a} onUpdate={onUpdate} />
       </div>
 

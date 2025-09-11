@@ -1,12 +1,13 @@
 "use client";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Link as LinkIcon, Activity, QrCode, Download, Trash2 } from "lucide-react";
+import { Calendar, Link as LinkIcon, Activity, QrCode, Download, Trash2, Edit, MoreVertical } from "lucide-react";
 import QRCode from "react-qr-code";
 import { Button } from "../ui/button";
 import { useRef, useState } from "react";
+import EditQrbtn from "../buttons/EditQrbtn";
 
-export default function QRcard({ a, onDelete }) {
+export default function QRcard({ a, onDelete, onUpdate }) {
   const [loading, setLoading] = useState(false);
   const qrref = useRef();
   const expiryDate = a.expire_at
@@ -20,6 +21,8 @@ export default function QRcard({ a, onDelete }) {
     : null;
 
   const isExpired = a.expire_at ? new Date(a.expire_at) < new Date() : false;
+  const islimit = a.max_scans !== -1 ? a.total_scans >= a.max_scans : false;
+  const exptext = islimit ? "Max Scans!" : ""
   const statusText = isExpired ? "Expired" : "Active";
   const handleDownload = () => {
     if (!qrref.current) return;
@@ -33,8 +36,8 @@ export default function QRcard({ a, onDelete }) {
     img.src = "data:image/svg+xml;base64," + btoa(source);
 
     img.onload = () => {
-      const qrSize = 200;       
-      const padding = 20;  
+      const qrSize = 200;
+      const padding = 20;
       const totalSize = qrSize + padding * 2;
 
       const canvas = document.createElement("canvas");
@@ -82,20 +85,32 @@ export default function QRcard({ a, onDelete }) {
   };
 
   return (
-    <Card className="relative bg-[#E5E5CB] border-[#3C2A21]/20 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-4 max-w-xs">
-      <button
-        onClick={handleDelete}
-        disabled={loading}
-        className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-red-100 transition-colors duration-200"
-        aria-label="Delete QR Code"
-      >
-        <Trash2 className={`h-5 w-5 ${loading ? "text-red-300" : "text-red-500"}`} />
-      </button>
-      <CardHeader className="flex flex-col items-center space-y-4 pb-2">
-        <span className="flex items-center gap-1 text-[#3C2A21] font-semibold text-lg">
-          <QrCode size={20} />
-          {a?.title}
-        </span>
+    <Card className="relative bg-[#E5E5CB] border-[#3C2A21]/20 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-4 max-w-xs group">
+      {/* Action buttons in top right */}
+      <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <button
+          onClick={handleDelete}
+          disabled={loading}
+          className="p-2 rounded-full hover:bg-red-100 transition-colors duration-200"
+          aria-label="Delete QR Code"
+        >
+          <Trash2 className={`h-4 w-4 ${loading ? "text-red-300" : "text-red-500"}`} />
+        </button>
+      </div>
+
+      {/* Edit button in top left */}
+      <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <EditQrbtn qrData={a} onUpdate={onUpdate} />
+      </div>
+
+
+      <CardHeader className="flex flex-col items-center space-y-4 pb-2 pt-8">
+        <div className="flex items-center gap-2 text-[#3C2A21] font-semibold text-lg text-center px-8">
+          <QrCode size={20} className="text-[#1A120B] flex-shrink-0" />
+          <span className="truncate" title={a?.title}>
+            {a?.title}
+          </span>
+        </div>
         <div className="p-4 bg-[#D5CEA3] rounded-lg shadow-inner" ref={qrref}>
           <QRCode size={120} value={a?.url} fgColor="#1A120B" bgColor="transparent" />
         </div>
@@ -128,12 +143,17 @@ export default function QRcard({ a, onDelete }) {
         </div>
         <div className="flex justify-between items-center">
           <span className="text-[#3C2A21] font-medium">Status</span>
-          <Badge
-            className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${isExpired ? "bg-[#3C2A21]/20 text-[#3C2A21]" : "bg-[#D5CEA3] text-[#1A120B]"
-              }`}
-          >
-            {statusText}
-          </Badge>
+          <div className="flex gap-2 align-middle">
+
+            <Badge
+              className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${isExpired ? "bg-[#3C2A21]/20 text-[#3C2A21]" : "bg-[#D5CEA3] text-[#1A120B]"
+                }`}
+            >
+              {statusText}
+            </Badge>
+            {islimit ? <Badge className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${isExpired ? "bg-[#3C2A21]/20 text-[#3C2A21]" : "bg-[#D5CEA3] text-[#1A120B]"
+              }`} >{exptext}</Badge> : ""}
+          </div>
         </div>
         {!isExpired && (
           <Button

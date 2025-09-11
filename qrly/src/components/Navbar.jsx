@@ -26,6 +26,9 @@ export default function Navbar() {
                         <Link href="/yourqrs" className="hover:text-[#D5CEA3] transition-colors duration-200">
                             YourQrs
                         </Link>
+                        <Link href="/about" className="hover:text-[#D5CEA3] transition-colors duration-200">
+                            About
+                        </Link>
                         <UserButton />
                     </div>
 
@@ -52,8 +55,19 @@ export default function Navbar() {
                     >
                         Home
                     </Link>
-                    <Link href="/yourqrs" className="hover:text-[#D5CEA3] transition-colors duration-200">
+                    <Link 
+                        href="/yourqrs" 
+                        className="block text-[#E5E5CB] hover:text-[#D5CEA3] transition-colors text-lg"
+                        onClick={() => setIsOpen(false)}
+                    >
                         YourQrs
+                    </Link>
+                    <Link 
+                        href="/about" 
+                        className="block text-[#E5E5CB] hover:text-[#D5CEA3] transition-colors text-lg"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        About
                     </Link>
                 </div>
             )}

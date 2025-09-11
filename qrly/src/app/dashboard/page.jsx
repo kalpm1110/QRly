@@ -28,6 +28,7 @@ export default async function DashBoard() {
     .eq("owner_id", user.id)
     .is("campaign_id", null)
     .order("created_at", { ascending: false });
+  console.log(user.id);
 
   return (
     <div className="min-h-screen bg-[#E5E5CB] p-6 max-w-7xl mx-auto">

@@ -59,7 +59,7 @@ export default async function QRpage({ params }) {
   const scansRaw = await redis.get(keyScans);
   const scans = scansRaw ? Number(scansRaw) : 0;
   const maxScans = Number(qrData.maxScans);
-
+  console.log(maxScans,scans)
   if (maxScans !== -1 && scans >= maxScans) {
     return <div>Max Scans has reached</div>;
   }

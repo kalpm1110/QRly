@@ -1,5 +1,6 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { QRList } from '@/components/QR/QRList';
+import { supabaseServer } from '@/lib/supabase';
 
 export default async function CamQR({ params }) {
   const user = await currentUser();
@@ -15,10 +16,15 @@ export default async function CamQR({ params }) {
     );
   }
 
+  const s=supabaseServer();
+  const{data:qrs,error}=await s.from("qranalytics").select("id, url, qr_id, total_scans, expire_at, campaign_id, target_url, title, user_id, max_scans").eq("campaign_id",camid)
+
+
+  if(error) return <div>Error In fecthing from supabase</div>
   return (
     <div className="min-h-screen bg-[#E5E5CB] p-6 max-w-7xl mx-auto">
       <h1 className="text-3xl text-center font-bold text-[#1A120B] mb-6">QR Codes for Campaign</h1>
-      <QRList camid={camid} userid={user.id} />
+      <QRList camid={camid} userid={user.id} initaildata={qrs} />
     </div>
   );
 }

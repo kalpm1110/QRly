@@ -75,6 +75,7 @@ export default function CreateQR({ defaultCampaignId = null }) {
               type="datetime-local"
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
               className="bg-[#E5E5CB] border-[#3C2A21]/20 focus:border-[#3C2A21] focus:ring-[#D5CEA3]"
             />
           </div>

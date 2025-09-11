@@ -3,6 +3,8 @@ import redis from "@/lib/redis";
 import { genslug } from "@/lib/slug";
 import { supabaseServer } from "@/lib/supabase";
 
+const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "");
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -13,7 +15,7 @@ export async function POST(req) {
       if (!existing) break;
       slug = genslug(7);
     }
-
+    console.log(body.campaign_id);
     const insertLoad = {
       title: body.title,
       owner_id: body.owner_id,
@@ -23,11 +25,9 @@ export async function POST(req) {
       max_scans: body.max_scans,
       expires_at: body.expires_at,
     };
-
-
     const { data, error } = await s.from("qrs").insert(insertLoad).select("*").single();
     if (error) return Response.json({ error: error.message }, { status: 400 });
-    const shortUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? ""}/r/${slug}`;
+    const shortUrl = `${BASE_URL?.replace(/\/$/, "") ?? ""}/r/${slug}`;
     const { data: d, error: err } = await s.from("qranalytics").insert([
       {
         qr_id: data.id,
@@ -38,6 +38,7 @@ export async function POST(req) {
         url: shortUrl,
         target_url: data.url,
         expire_at: data.expires_at,
+        max_scans:data.max_scans
       },
     ]);
     if (err) return Response.json({ msg: err.message });
@@ -98,6 +99,70 @@ export async function DELETE(req) {
     return Response.json({ msg: "QR deleted successfully" });
   } catch (err) {
     console.error("Error deleting QR:", err);
+    return Response.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function PUT(req) {
+  try {
+    const body = await req.json();
+    console.log(typeof (body.total_scans));
+    const s = supabaseServer();
+    const { data, error } = await s
+      .from("qrs")
+      .update({
+        title: body.title,
+        url: body.url,
+        max_scans: body.max_scans,
+        expires_at: body.expires_at,
+        campaign_id: body.campaign_id ?? null,
+      })
+      .eq("id", body.qrId)
+      .select("*")
+      .single();
+
+    if (error) {
+      return Response.json({ error: error.message }, { status: 400 });
+    }
+
+    await s
+      .from("qranalytics")
+      .update({
+        title: data.title,
+        campaign_id: data.campaign_id ?? null,
+        target_url: data.url,
+        expire_at: data.expires_at,
+        max_scans: body.max_scans,
+      })
+      .eq("qr_id", data.id);
+    const ttlSec = data.expires_at
+      ? Math.floor((new Date(data.expires_at).getTime() - Date.now()) / 1000)
+      : null;
+    const avalKey = `qr:${data.slug}:aval`;
+    const scansKey = `qr:${data.slug}:scans`;
+    const urlKey = `qr:${data.slug}:url`;
+    const maxScansKey = `qr:${data.slug}:max_scans`;
+    const idKey = `qr:${data.slug}:id`;
+
+    if (ttlSec && ttlSec > 0) {
+      await redis.set(avalKey, 1, { ex: ttlSec });
+      await redis.set(urlKey, data.url, { ex: ttlSec });
+      await redis.set(maxScansKey, Number(data.max_scans), { ex: ttlSec });
+      await redis.set(idKey, data.id, { ex: ttlSec });
+      await redis.set(scansKey, Number(body.total_scans ?? 0), { ex: ttlSec });
+    } else if (ttlSec === null) {
+      await redis.set(avalKey, 1);
+      await redis.set(urlKey, data.url);
+      await redis.set(maxScansKey, Number(data.max_scans));
+      await redis.set(idKey, data.id);
+      await redis.set(scansKey, Number(body.total_scans ?? 0));
+    } else {
+      await redis.del(avalKey, urlKey, maxScansKey, idKey, scansKey);
+    }
+
+    return Response.json({ updatedQR: data });
+  } catch (err) {
+    console.error("Error updating QR:", err);
     return Response.json({ error: err.message }, { status: 500 });
   }
 }

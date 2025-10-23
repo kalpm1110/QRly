@@ -1,4 +1,5 @@
 
+import { createQrRateLimiter } from "@/lib/rateLimit";
 import redis from "@/lib/redis";
 import { genslug } from "@/lib/slug";
 import { supabaseServer } from "@/lib/supabase";
@@ -8,6 +9,11 @@ const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "");
 export async function POST(req) {
   try {
     const body = await req.json();
+    const {success,limit,remaining,reset}=await createQrRateLimiter.limit(body.owner_id);
+    console.log(success,limit,remaining,reset);
+    if(!success){
+      return Response.json({error:"Rate Limit Exceeded for Qr Creation"}, {status:429});
+    }
     const s = supabaseServer();
     let slug = genslug(7);
     for (let i = 0; i < 5; i++) {

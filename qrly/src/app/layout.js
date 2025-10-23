@@ -36,6 +36,7 @@ export default function RootLayout({ children }) {
         <body
           className={`${geistSans.variable} ${geistMono.variable} bg-[#E5E5CB] text-[#1A120B] antialiased`}
         >
+          {/* <div class="absolute top-0 z-[-2] h-screen w-screen rotate-180 transform bg-[#E5E5CB] bg-[radial-gradient(60%_120%_at_50%_50%,hsla(0,0%,100%,0)_0,rgba(252,205,238,.5)_100%)]"></div> */}
           <Navbar />
           <main className="min-h-screen">
             {children}

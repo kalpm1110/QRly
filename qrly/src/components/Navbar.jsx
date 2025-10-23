@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 
 export default function Navbar() {
@@ -30,6 +30,7 @@ export default function Navbar() {
                             About
                         </Link>
                         <UserButton />
+                       
                     </div>
 
                     {/* Mobile Hamburger */}
@@ -69,6 +70,7 @@ export default function Navbar() {
                     >
                         About
                     </Link>
+      
                 </div>
             )}
         </nav>

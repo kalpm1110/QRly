@@ -1,6 +1,9 @@
+import { scanRateLimiter } from "@/lib/rateLimit";
 import redis from "@/lib/redis";
 import { supabaseServer } from "@/lib/supabase";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+
 
 
 async function getQR(slug, supabase) {
@@ -40,6 +43,22 @@ async function getQR(slug, supabase) {
 }
 
 export default async function QRpage({ params }) {
+  const headerList= await headers();
+  // console.log("Request Headers:", Object.fromEntries(headerList.entries()));
+  const ip=headerList.get("x-forwarded-for") || "unkown";
+  console.log("Client IP:", ip);
+  // const {success,limit,remaining,reset}= await scanRateLimiter.limit(ip);
+  // console.log(`Rate Limit - Success: ${success}, Limit: ${limit}, Remaining: ${remaining}, Reset: ${reset}`);
+  try {
+  const { success } = await scanRateLimiter.limit(ip);
+  console.log("Rate limit success:", success);
+} catch (err) {
+  console.error("Rate limiter error:", err);
+}
+
+  if(!success){
+    return new Response("Rate Limit for scan Exceeded",{status:429});
+  }
   const { slug } = await params;
 
   const keyActive = `qr:${slug}:aval`;
@@ -72,4 +91,5 @@ export default async function QRpage({ params }) {
     .catch(err => console.error("Supabase RPC failed", err));
 
   redirect(qrData.url);
+  // console.log("Redirecting to:", qrData.url);
 }

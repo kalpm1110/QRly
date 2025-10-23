@@ -22,9 +22,9 @@ export default async function AllQrs() {
 
   if (error) return <div>Error in fetching from DB</div>
   return (
-    <div className="min-h-screen bg-[#E5E5CB] p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold text-[#1A120B] mb-6">Your QR Codes</h1>
-      <QRList userid={user.id} initaildata={qrs} />
+    <div className="min-h-screen  p-6 max-w-7xl mx-auto">
+      {/* <h1 className="text-3xl text-center font-bold text-[#1A120B] mb-6">Your QR Codes</h1> */}
+      <QRList userid={user.id} initailData={qrs} />
     </div>
   );
 }

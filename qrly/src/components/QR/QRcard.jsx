@@ -138,7 +138,7 @@ export default function QRcard({ a, onDelete, onUpdate }) {
             <Calendar size={14} />
             Expiry
           </span>
-          <span className="text-[#3C2A21]">{expiryDate ?? "—"}</span>
+          <span className="text-[#3C2A21] ">{expiryDate ?? "—"}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-[#3C2A21] font-medium">Status</span>

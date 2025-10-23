@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#E5E5CB] flex flex-col items-center justify-center text-center px-4">
+    <div className="min-h-screen  flex flex-col items-center justify-center text-center px-4">
       <h1 className="text-5xl md:text-6xl font-bold text-[#1A120B] mb-6 tracking-tight">
         Welcome to QRly
       </h1>

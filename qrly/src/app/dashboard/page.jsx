@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import CampaignList from "@/components/campaign/CampaignList";
 import { supabaseServer } from "@/lib/supabase";
+import Dashboard from "@/components/Dashboard";
 
 export default async function DashBoard() {
   const user = await currentUser();
@@ -31,11 +32,12 @@ export default async function DashBoard() {
   console.log(user.id);
 
   return (
-    <div className="min-h-screen bg-[#E5E5CB] p-6 max-w-7xl mx-auto">
+    <div className="min-h-screen  p-6 max-w-7xl mx-auto">
       <h1 className="text-3xl font-bold text-[#1A120B] mb-6">
         Welcome, {user.firstName}!
       </h1>
       <CampaignList cam={cam || []} onlyqrs={onlyqrs || []} />
+      {/* <Dashboard user={user} campaigns={cam || []} individualQRs={onlyqrs || []} ></Dashboard> */}
     </div>
   );
 }

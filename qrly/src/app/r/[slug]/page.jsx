@@ -52,13 +52,12 @@ export default async function QRpage({ params }) {
   try {
   const { success } = await scanRateLimiter.limit(ip);
   console.log("Rate limit success:", success);
-} catch (err) {
-  console.error("Rate limiter error:", err);
-}
-
   if(!success){
     return new Response("Rate Limit for scan Exceeded",{status:429});
   }
+} catch (err) {
+  console.error("Rate limiter error:", err);
+}
   const { slug } = await params;
 
   const keyActive = `qr:${slug}:aval`;

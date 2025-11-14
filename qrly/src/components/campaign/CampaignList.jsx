@@ -62,14 +62,14 @@ function CampaignList({ cam }) {
                   View QR's
                 </Button>
               </Link>
-              <CreateQrbtn defaultcamid={campaign.id} />
+              <CreateQrbtn defaultcamid={campaign.id} defaultcamname={campaign.name} />
             </div>
           </div>
         ))}
       </div>
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8 w-full max-w-md mx-auto">
         <CreateCambtn />
-        <CreateQrbtn defaultcamid={null} />
+        <CreateQrbtn defaultcamid={null} defaultcamname={null} />
       </div>
     </div>
   );

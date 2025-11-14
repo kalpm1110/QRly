@@ -197,8 +197,11 @@ import { useEffect, useState } from "react";
 import QRcard from "./QRcard";
 import CreateQrbtn from "../buttons/CreateQrbtn";
 import { Activity } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 
-export function QRList({ userid, camid, initialData = null }) {
+export function QRList({ camid, initialData }) {
+  const {user}=useUser();
+  const userid=user?.id;
   const [analytics, setanalytics] = useState(initialData || []);
   const [loading, setLoading] = useState(!initialData);
   const supabase = supabaseBrowser();
@@ -210,6 +213,7 @@ export function QRList({ userid, camid, initialData = null }) {
     }
 
     if (!initialData) {
+      console.log(initialData);
       const fetchInitial = async () => {
         setLoading(true);
         let query = supabase

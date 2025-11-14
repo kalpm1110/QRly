@@ -22,8 +22,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "QRly",
+  title:{
+    default:"QRly",
+    template:"%s | QRly"
+  },
   description: "Create and track QR codes with real-time analytics",
+  twitter:{
+    card:"summary_large_image"
+  }
 };
 
 

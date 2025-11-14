@@ -2,6 +2,12 @@ import { currentUser } from "@clerk/nextjs/server";
 import { QRList } from "@/components/QR/QRList";
 import { supabaseServer } from "@/lib/supabase";
 
+
+export const metadata={
+  title:"Analytics",
+  description:"Analytics of The QR's .",
+}
+
 export default async function AllQrs() {
   const user = await currentUser();
 
@@ -24,7 +30,7 @@ export default async function AllQrs() {
   return (
     <div className="min-h-screen  p-6 max-w-7xl mx-auto">
       {/* <h1 className="text-3xl text-center font-bold text-[#1A120B] mb-6">Your QR Codes</h1> */}
-      <QRList userid={user.id} initailData={qrs} />
+      <QRList userid={user.id} initialData={qrs} />
     </div>
   );
 }

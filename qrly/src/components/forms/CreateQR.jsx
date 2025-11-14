@@ -7,11 +7,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useUser } from '@clerk/nextjs';
 import QRModal from '../QR/QRModal';
 
-export default function CreateQR({ defaultCampaignId = null }) {
+export default function CreateQR({ defaultCampaignId = null, defaultcamname=null }) {
   const { user } = useUser();
   const [title, setTitle] = useState("");
   const [targetUrl, setTargetUrl] = useState("");
   const [campaignId, setCampaignId] = useState(defaultCampaignId);
+  const [camname, setcamname] = useState(defaultcamname);
   const [expiresAt, setExpiresAt] = useState("");
   const [maxScans, setMaxScans] = useState(-1);
   const [shortUrl, setShortUrl] = useState(null);
@@ -24,6 +25,7 @@ export default function CreateQR({ defaultCampaignId = null }) {
     const payload = {
       title,
       owner_id: user.id,
+      camname:defaultcamname || null,
       campaign_id: defaultCampaignId || null,
       max_scans: maxScans || 0,
       url: targetUrl,

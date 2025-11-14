@@ -40,6 +40,7 @@ export async function POST(req) {
         total_scans: 0,
         user_id: data.owner_id,
         title: data.title,
+        camname:body.camname,
         campaign_id: data.campaign_id ?? null,
         url: shortUrl,
         target_url: data.url,

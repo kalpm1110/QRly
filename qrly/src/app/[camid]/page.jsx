@@ -3,25 +3,19 @@ import { QRList } from '@/components/QR/QRList';
 import { supabaseServer } from '@/lib/supabase';
 
 
-export async function generateStaticParams(){
-  const s=supabaseServer();
-  const {data,error}=await s.from("campaigns").select("id");
-  return data.map((cam)=>({camid:cam.id.toString()}));
-}
-
 
 export async function generateMetadata({ params }) {
   const { camid } = params;
-
+  
   const s = supabaseServer();
   const { data, error } = await s
-    .from("qranalytics")
-    .select("camname")
-    .eq("campaign_id", camid)
+    .from("campaigns")
+    .select("name")
+    .eq("id", camid)
     .limit(1)
     .single();   // ensures you get an object instead of array
-
-  const camname = data?.camname=="NULL"?"Campaign":data?.camname;
+  
+  const camname = data?.name=="NULL"?"Campaign":data?.name;
 
   return {
     title: camname,
